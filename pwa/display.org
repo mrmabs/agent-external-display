@@ -1,0 +1,18 @@
+#+TITLE: Quick Test
+#+DISPLAY_MODE: side-by-side
+#+COLUMNS: 2
+#+FORMAT_VERSION: 1
+
+* Option A — Gradual Rollout
+  :PROPERTIES:
+  :PANE: 1
+  :END:
+
+Pane 1
+
+* Option B — Full Launch
+  :PROPERTIES:
+  :PANE: 2
+  :END:
+
+Pane 2

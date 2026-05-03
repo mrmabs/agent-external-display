@@ -2,7 +2,7 @@
 name: talk-through
 description: "Use when the user says 'walk me through', 'explain step by step', or 'tell me about X'. Writes a sequenced display file within 80×20 budget (expandable to 160×40 on request), delivering each step verbally as the display advances."
 version: 1.1.0
-author: Marcus Berg, Cellia
+author: mabs, hermes
 license: MIT
 tags: [display, output, sequential, reveal, explanation, walkthrough, org-mode, agent-pattern]
 related_skills: [show-me]

@@ -72,7 +72,7 @@ Supports `side-by-side` mode for comparisons:
   :END:
 ```
 
-→ [skills/show-me/SKILL.md](skills/show-me/SKILL.md)
+→ [skills/display/show-me/SKILL.md](skills/display/show-me/SKILL.md)
 
 ### talk-through
 
@@ -107,7 +107,7 @@ The sun heats water in oceans and lakes.
 Water vapour rises and cools into clouds.
 ```
 
-→ [skills/talk-through/SKILL.md](skills/talk-through/SKILL.md)
+→ [skills/display/talk-through/SKILL.md](skills/display/talk-through/SKILL.md)
 
 ## Format Specification
 

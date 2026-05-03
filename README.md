@@ -31,7 +31,7 @@ These skills define how an agent writes that content: what file, what format, wh
 
 The display file uses a subset of Emacs Org-mode. `#+` directives configure the renderer (mode, columns, refresh). `:PROPERTIES:` drawers attach metadata to sections (step order, pane assignment, timestamps). This is unambiguous, extensible, and readable without a renderer.
 
-See [why-orgmode.md](why-orgmode.md) for the full rationale, or [references/display-format.md](references/display-format.md) for the format specification.
+See [why-orgmode.md](why-orgmode.md) for the full rationale, or [references/display-format.md](skills/display/references/format.md) for the format specification.
 
 ## Skills
 

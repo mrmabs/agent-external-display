@@ -1,3 +1,15 @@
+# Preamble (non-AI)
+
+The majority of this repo was AI generated, and this project has been shared to allow others to look at it and build on what I have. I am also working to build supporting infrastructure on this to support voice interactivity, and making the "chat" session essentially a hidden debug stream.
+
+The inspiration for the larger project combines my own thoughts on creating an interactive user interface like in the [Apple Knowledge Navigator](https://www.youtube.com/watch?v=umJsITGzXd0) demo, and a "software defined interface" as [described by Michael Okuda in conversation with Adam Savage](https://youtu.be/D24tYFIVyv0?t=228) about LCARS in Star Trek: The Next Generation.
+
+I won't be actively reviewing PRs, but you are welcome to fork and enjoy.
+
+Below here, I have minimal input; which is mostly intertwined with AI-generated content.
+
+-----
+
 # Display Skills
 
 Agent skills for writing structured content to a display file that a companion renderer presents on a screen. The agent handles detail; the conversation stays brief.
@@ -173,7 +185,9 @@ Future skill ideas:
 
 This project uses [AI-DECLARATION.md](https://ai-declaration.md/en/0.1.2/) to declare AI involvement. See [AI-DECLARATION.md](AI-DECLARATION.md) for the full breakdown by process and component.
 
-**Copyright and licensing status may vary by jurisdiction.** Some jurisdictions do not recognise copyright in AI-generated output, or apply different rules to works produced with AI assistance. Where local law holds that this content is not copyrightable or is subject to different rules, those laws take precedence over the MIT licence below. In jurisdictions where the content is copyrightable, it is licensed under the MIT licence as stated.
+**Copyright and licensing status may vary by jurisdiction.** Some jurisdictions do not recognise copyright of AI-generated output, or apply different rules to works produced with AI assistance. Where local law holds that this content is not copyrightable or is subject to different rules, those laws take precedence over the MIT licence below. In jurisdictions where the content is copyrightable, it is licensed under the MIT licence as stated.
+
+Personal issues with AI-generated content aside, this decision was taken as PD/CC0 may be complicated by the copyrights of contributions to the model used to create the code; and GPL variants may also be completely incompatible with those. I have no plans to defend the licence of any AI generated code, MIT is literally a best fit placeholder.
 
 ## Licence
 

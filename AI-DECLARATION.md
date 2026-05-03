@@ -22,7 +22,7 @@ This format is based on [AI-DECLARATION.md](https://ai-declaration.md/en/0.1.2/)
 - Mabs designed the project, defined the format spec, wrote the test
   scenarios, and made all design decisions (display budget, org-mode format,
   VISIBLE-driven step advancement, presenter voice).
-- AI tools (Cellia via Hermes Agent) generated draft skill text, PWA renderer
+- AI tools (Hermes Agent) generated draft skill text, PWA renderer
   code, and server code under that direction. All output was reviewed, tested,
   and refined by the human author.
 - The `pwa/` code (renderer and server) was largely AI-generated (`auto`) with

@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#1a1a2e">
+<link rel="manifest" href="/manifest.json">
+<title>Display</title>
+<style>
+/* ===== Reset & Base ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; scroll-behavior: smooth; }
+body {
+  background: #1a1a2e;
+  color: #e0e0e0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+  line-height: 1.6;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ===== Layout ===== */
+#app { max-width: 900px; margin: 0 auto; padding: 20px; }
+
+/* ===== Mode Badge ===== */
+#mode-badge {
+  position: fixed; top: 12px; right: 12px; z-index: 1000;
+  background: #7c3aed; color: #fff; font-size: 11px; font-weight: 600;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 4px 10px; border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(124,58,237,0.3);
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+}
+
+/* ===== Title ===== */
+.doc-title {
+  font-size: 1.8rem; font-weight: 700; color: #7c3aed;
+  margin-bottom: 24px; padding-bottom: 12px;
+  border-bottom: 2px solid #2d2d44;
+}
+
+/* ===== Headings ===== */
+.org-h1 { font-size: 1.5rem; font-weight: 700; color: #7c3aed; margin: 28px 0 12px; }
+.org-h2 { font-size: 1.3rem; font-weight: 600; color: #a78bfa; margin: 22px 0 10px; }
+.org-h3 { font-size: 1.15rem; font-weight: 600; color: #c4b5fd; margin: 18px 0 8px; }
+.org-h4 { font-size: 1.05rem; font-weight: 600; color: #e0e0e0; margin: 14px 0 6px; }
+.org-h5 { font-size: 1rem; font-weight: 600; color: #e0e0e0; margin: 10px 0 4px; }
+
+/* ===== Section / Card ===== */
+.section-card {
+  background: #22223a;
+  border: 1px solid #2d2d44;
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin-bottom: 16px;
+}
+
+/* ===== Inline Formatting ===== */
+.org-bold { font-weight: 700; color: #f0f0f0; }
+.org-italic { font-style: italic; color: #d0d0d0; }
+.org-code {
+  background: #2d2d44; color: #a5f3fc; padding: 2px 6px;
+  border-radius: 3px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  font-size: 0.88em;
+}
+.org-link { color: #7c3aed; text-decoration: underline; cursor: pointer; }
+.org-link:hover { color: #a78bfa; }
+.org-image { max-width: 100%; border-radius: 6px; margin: 8px 0; }
+
+/* ===== Lists ===== */
+.org-ul, .org-ol { padding-left: 24px; margin: 8px 0; }
+.org-ul { list-style: disc; }
+.org-ol { list-style: decimal; }
+.org-li { margin: 4px 0; line-height: 1.5; }
+.org-li .org-ul, .org-li .org-ol { margin: 4px 0; }
+
+/* ===== Tables ===== */
+.org-table { border-collapse: collapse; width: 100%; margin: 12px 0; font-size: 0.92em; }
+.org-table th { background: #2d2d44; color: #a78bfa; font-weight: 600; text-align: left; }
+.org-table td, .org-table th { padding: 8px 12px; border: 1px solid #2d2d44; }
+.org-table tr:nth-child(even) td { background: #1e1e36; }
+
+/* ===== Source Blocks ===== */
+.org-src-block {
+  background: #0d0d1a; border: 1px solid #2d2d44; border-radius: 6px;
+  padding: 12px 16px; margin: 12px 0; overflow-x: auto;
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  font-size: 0.88em; line-height: 1.5;
+}
+.org-src-lang {
+  color: #7c3aed; font-size: 0.8em; font-weight: 600;
+  margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em;
+}
+
+/* ===== Properties Drawer ===== */
+.org-props {
+  background: #1a1a2e; border: 1px solid #2d2d44; border-radius: 4px;
+  padding: 8px 12px; margin: 6px 0 10px;
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  font-size: 0.82em; color: #888;
+}
+.org-prop-key { color: #7c3aed; }
+.org-prop-val { color: #c0c0c0; }
+
+/* ===== Horizontal Rule ===== */
+.org-hr { border: none; border-top: 1px solid #2d2d44; margin: 20px 0; }
+
+/* ===== Body text ===== */
+.org-body { margin: 6px 0; line-height: 1.6; }
+
+/* ===== Waiting state ===== */
+.waiting-msg {
+  display: flex; align-items: center; justify-content: center;
+  min-height: 60vh; text-align: center; color: #666;
+  font-size: 1.1rem;
+}
+.waiting-msg .spinner {
+  display: inline-block; width: 20px; height: 20px;
+  border: 2px solid #2d2d44; border-top-color: #7c3aed;
+  border-radius: 50%; margin-right: 10px;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ===== Hero Image ===== */
+.hero-image { max-width: 100%; border-radius: 8px; margin: 12px 0 20px; }
+
+/* ===== Talk-through ===== */
+.talk-nav {
+  position: sticky; bottom: 16px; z-index: 100;
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  background: #22223a; border-radius: 10px; padding: 10px 20px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  margin-top: 16px;
+}
+.talk-nav button {
+  background: #7c3aed; color: #fff; border: none; border-radius: 6px;
+  padding: 8px 18px; font-size: 0.9rem; cursor: pointer;
+  font-weight: 600;
+}
+.talk-nav button:hover { background: #6d28d9; }
+.talk-nav button:disabled { background: #3d3d5c; cursor: not-allowed; }
+.talk-step { color: #a78bfa; font-weight: 600; font-size: 0.9rem; }
+.step-hidden { display: none !important; }
+.step-visible { display: block; }
+
+/* ===== Side-by-side ===== */
+.side-by-side-grid {
+  display: grid; gap: 16px;
+}
+.pane-section { page-break-inside: avoid; }
+
+/* ===== Slides ===== */
+.slide-container {
+  min-height: 70vh;
+  display: flex; flex-direction: column; justify-content: center;
+  padding: 40px 20px;
+}
+.slide-nav {
+  position: sticky; bottom: 16px; z-index: 100;
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  background: #22223a; border-radius: 10px; padding: 10px 20px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  margin-top: 16px;
+}
+.slide-nav button {
+  background: #7c3aed; color: #fff; border: none; border-radius: 6px;
+  padding: 8px 18px; font-size: 0.9rem; cursor: pointer;
+  font-weight: 600;
+}
+.slide-nav button:hover { background: #6d28d9; }
+.slide-nav button:disabled { background: #3d3d5c; cursor: not-allowed; }
+.slide-counter { color: #a78bfa; font-weight: 600; font-size: 0.9rem; }
+.speaker-notes {
+  background: #16162a; border: 1px solid #2d2d44; border-radius: 6px;
+  padding: 10px 14px; margin-top: 12px; font-size: 0.85rem; color: #888;
+  font-style: italic;
+}
+
+/* ===== Dashboard ===== */
+.dash-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px;
+}
+.dash-card {
+  background: #22223a; border: 1px solid #2d2d44; border-radius: 8px;
+  padding: 16px 20px;
+}
+.dash-card .card-icon { font-size: 1.4rem; margin-right: 8px; }
+.dash-refresh-badge {
+  font-size: 0.7rem; color: #555; font-family: monospace;
+}
+
+/* ===== Card mode ===== */
+.card-center {
+  display: flex; align-items: center; justify-content: center;
+  min-height: 70vh;
+}
+.status-card {
+  background: #22223a; border: 2px solid #7c3aed; border-radius: 12px;
+  padding: 32px 40px; max-width: 400px; text-align: center;
+  box-shadow: 0 0 30px rgba(124,58,237,0.15);
+}
+.status-card .card-icon { font-size: 2.5rem; margin-bottom: 12px; display: block; }
+.status-card .card-title { font-size: 1.3rem; font-weight: 700; color: #7c3aed; margin-bottom: 12px; }
+.status-card .card-body { font-size: 1rem; line-height: 1.6; }
+
+/* ===== Responsive ===== */
+@media (max-width: 600px) {
+  #app { padding: 12px; }
+  .doc-title { font-size: 1.4rem; }
+  .org-h1 { font-size: 1.25rem; }
+  .org-h2 { font-size: 1.1rem; }
+  .section-card { padding: 12px; }
+  .dash-grid { grid-template-columns: 1fr; }
+  .status-card { padding: 24px; }
+  .side-by-side-grid { grid-template-columns: 1fr !important; }
+}
+</style>
+</head>
+<body>
+
+<div id="mode-badge">MODE: show</div>
+<div id="app">
+  <div class="waiting-msg">
+    <div class="spinner"></div>
+    <span>Waiting for content...</span>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// ORG-MODE PARSER
+// ============================================================
+function parseOrg(text) {
+  if (!text || !text.trim()) return { headers: {}, sections: [], title: '' };
+
+  var lines = text.split('\n');
+  var i = 0;
+  var headers = {};
+  var sections = [];
+
+  // --- Parse #+ directives at the top ---
+  while (i < lines.length) {
+    var m = lines[i].match(/^#\+(\w+):\s*(.*)/);
+    if (m) {
+      headers[m[1]] = m[2].trim();
+      i++;
+    } else if (lines[i].trim() === '') {
+      i++;
+    } else {
+      break;
+    }
+  }
+
+  // --- Parse sections (headings + their content) ---
+  function parseProperties(startIdx) {
+    var props = {};
+    if (startIdx >= lines.length) return { props: props, endIdx: startIdx };
+    if (lines[startIdx].trim() !== ':PROPERTIES:') return { props: props, endIdx: startIdx };
+    var j = startIdx + 1;
+    while (j < lines.length) {
+      var line = lines[j].trim();
+      if (line === ':END:') { j++; break; }
+      var pm = line.match(/^:(\w+):\s*(.*)/);
+      if (pm) props[pm[1]] = pm[2].trim();
+      j++;
+    }
+    return { props: props, endIdx: j };
+  }
+
+  // Collect preamble (content before first heading)
+  var preambleLines = [];
+  if (i < lines.length && !lines[i].match(/^\*+\s/)) {
+    var buf = [];
+    while (i < lines.length && !lines[i].match(/^\*+\s/)) {
+      buf.push(lines[i]);
+      i++;
+    }
+    if (buf.some(function(l) { return l.trim() !== ''; })) {
+      preambleLines = buf;
+    }
+  }
+
+  // Parse heading sections
+  var allSections = [];
+  while (i < lines.length) {
+    var hm = lines[i].match(/^(\*+)\s+(.*)/);
+    if (hm) {
+      var level = hm[1].length;
+      var heading = hm[2];
+      i++;
+      // Skip blank lines, check for properties drawer
+      while (i < lines.length && lines[i].trim() === '') i++;
+      var propsResult = parseProperties(i);
+      var props = propsResult.props;
+      i = propsResult.endIdx;
+      // Collect content lines until next heading of same or higher level
+      var contentLines = [];
+      while (i < lines.length) {
+        var nm = lines[i].match(/^(\*+)\s+/);
+        if (nm && nm[1].length <= level) break;
+        contentLines.push(lines[i]);
+        i++;
+      }
+      allSections.push({
+        level: level,
+        heading: heading,
+        properties: props,
+        content: parseContentLines(contentLines)
+      });
+    } else {
+      i++;
+    }
+  }
+
+  // Build section tree (nested)
+  var sectionTree = buildSectionTree(allSections);
+
+  return {
+    headers: headers,
+    sections: sectionTree,
+    preamble: preambleLines.length > 0 ? parseContentLines(preambleLines) : null,
+    title: headers.TITLE || ''
+  };
+}
+
+function buildSectionTree(sections) {
+  if (!sections.length) return sections;
+  var root = [];
+  var stack = [{ children: root, level: 0 }];
+
+  for (var idx = 0; idx < sections.length; idx++) {
+    var sec = sections[idx];
+    var node = { level: sec.level, heading: sec.heading, properties: sec.properties, content: sec.content, children: [] };
+    while (stack.length > 1 && stack[stack.length - 1].level >= node.level) {
+      stack.pop();
+    }
+    stack[stack.length - 1].children.push(node);
+    stack.push(node);
+  }
+  return root;
+}
+
+function parseContentLines(lines) {
+  var blocks = [];
+  var i = 0;
+
+  while (i < lines.length) {
+    var line = lines[i];
+
+    // Source block
+    if (line.match(/^\s*#\+BEGIN_SRC\s*/i)) {
+      var lang = line.replace(/^\s*#\+BEGIN_SRC\s*/i, '').trim();
+      var codeLines = [];
+      i++;
+      while (i < lines.length && !lines[i].match(/^\s*#\+END_SRC/i)) {
+        codeLines.push(lines[i]);
+        i++;
+      }
+      if (i < lines.length) i++; // skip #+END_SRC
+      blocks.push({ type: 'src', lang: lang, code: codeLines.join('\n') });
+      continue;
+    }
+
+    // Table
+    if (line.match(/^\s*\|/)) {
+      var tableLines = [];
+      while (i < lines.length && lines[i].match(/^\s*\|/)) {
+        tableLines.push(lines[i]);
+        i++;
+      }
+      blocks.push({ type: 'table', rows: parseTable(tableLines) });
+      continue;
+    }
+
+    // Unordered list
+    if (line.match(/^\s*-\s+/)) {
+      var items = [];
+      while (i < lines.length) {
+        var lm = lines[i].match(/^(\s*)-\s+(.*)/);
+        if (!lm) break;
+        items.push({ text: lm[2], indent: lm[1].length, children: [] });
+        i++;
+      }
+      blocks.push({ type: 'ul', items: items });
+      continue;
+    }
+
+    // Ordered list
+    if (line.match(/^\s*\d+\.\s+/)) {
+      var olItems = [];
+      while (i < lines.length) {
+        var olm = lines[i].match(/^(\s*)\d+\.\s+(.*)/);
+        if (!olm) break;
+        olItems.push({ text: olm[2], indent: olm[1].length, children: [] });
+        i++;
+      }
+      blocks.push({ type: 'ol', items: olItems });
+      continue;
+    }
+
+    // Horizontal rule (5+ dashes)
+    if (line.match(/^\s*-{5,}\s*$/)) {
+      blocks.push({ type: 'hr' });
+      i++;
+      continue;
+    }
+
+    // Blank line
+    if (line.trim() === '') {
+      i++;
+      continue;
+    }
+
+    // Property drawer lines (shouldn't normally be in content, skip)
+    if (line.trim() === ':PROPERTIES:' || line.trim() === ':END:') {
+      i++;
+      continue;
+    }
+    if (line.match(/^\s*:\w+:\s*/)) {
+      i++;
+      continue;
+    }
+
+    // Regular text line
+    blocks.push({ type: 'text', text: line });
+    i++;
+  }
+
+  return blocks;
+}
+
+function parseTable(tableLines) {
+  var rows = [];
+  for (var idx = 0; idx < tableLines.length; idx++) {
+    var line = tableLines[idx];
+    // Skip separator rows like |---+---|
+    if (line.match(/^\s*\|[-+\s|]+\|\s*$/)) continue;
+    var cells = line.split('|').slice(1, -1).map(function(c) { return c.trim(); });
+    rows.push(cells);
+  }
+  return rows;
+}
+
+// ============================================================
+// INLINE FORMATTING PARSER
+// ============================================================
+function renderInline(text) {
+  if (!text) return '';
+  var html = escapeHtml(text);
+
+  // Links: [[url][text]] or [[url]]
+  html = html.replace(/\[\[([^\]]+)\]\[([^\]]*)\]\]/g, function(m, url, txt) {
+    return '<a class="org-link" href="' + escapeHtml(url) + '">' + renderInlineInner(txt) + '</a>';
+  });
+  html = html.replace(/\[\[([^\]]+)\]\]/g, function(m, url) {
+    // Image check
+    if (url.match(/\.(png|jpg|jpeg|gif|webp|svg)$/i)) {
+      return '<img class="org-image" src="' + escapeHtml(url) + '" alt="' + escapeHtml(url) + '">';
+    }
+    return '<a class="org-link" href="' + escapeHtml(url) + '">' + escapeHtml(url) + '</a>';
+  });
+
+  // Bold: *text*
+  html = html.replace(/\*([^*]+)\*/g, '<strong class="org-bold">$1</strong>');
+  // Italic: /text/
+  html = html.replace(/\/([^/]+)\//g, '<em class="org-italic">$1</em>');
+  // Code: =text=
+  html = html.replace(/=([^=]+)=/g, '<code class="org-code">$1</code>');
+
+  return html;
+}
+
+function renderInlineInner(text) {
+  if (!text) return '';
+  var html = escapeHtml(text);
+  html = html.replace(/\*([^*]+)\*/g, '<strong class="org-bold">$1</strong>');
+  html = html.replace(/\/([^/]+)\//g, '<em class="org-italic">$1</em>');
+  html = html.replace(/=([^=]+)=/g, '<code class="org-code">$1</code>');
+  return html;
+}
+
+function escapeHtml(str) {
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+// ============================================================
+// RENDERING
+// ============================================================
+function renderContentBlocks(blocks) {
+  if (!blocks) return '';
+  return blocks.map(function(b) { return renderBlock(b); }).join('\n');
+}
+
+function renderBlock(block) {
+  switch (block.type) {
+    case 'src':
+      return '<div class="org-src-block">' +
+        (block.lang ? '<div class="org-src-lang">' + escapeHtml(block.lang) + '</div>' : '') +
+        '<pre>' + escapeHtml(block.code) + '</pre></div>';
+    case 'table':
+      if (!block.rows || !block.rows.length) return '';
+      var headerRow = block.rows[0];
+      var bodyRows = block.rows.slice(1);
+      var html = '<table class="org-table"><thead><tr>';
+      headerRow.forEach(function(cell) { html += '<th>' + renderInline(cell) + '</th>'; });
+      html += '</tr></thead><tbody>';
+      bodyRows.forEach(function(row) {
+        html += '<tr>';
+        row.forEach(function(cell) { html += '<td>' + renderInline(cell) + '</td>'; });
+        html += '</tr>';
+      });
+      html += '</tbody></table>';
+      return html;
+    case 'ul':
+      return renderList(block.items, 'ul');
+    case 'ol':
+      return renderList(block.items, 'ol');
+    case 'hr':
+      return '<hr class="org-hr">';
+    case 'text':
+      return '<p class="org-body">' + renderInline(block.text) + '</p>';
+    default:
+      return '';
+  }
+}
+
+function renderList(items, type) {
+  var tag = type === 'ul' ? 'ul' : 'ol';
+  var cls = type === 'ul' ? 'org-ul' : 'org-ol';
+  var html = '<' + tag + ' class="' + cls + '">';
+  for (var i = 0; i < items.length; i++) {
+    var item = items[i];
+    html += '<li class="org-li">' + renderInline(item.text);
+    if (item.children && item.children.length > 0) {
+      html += renderList(item.children, type);
+    }
+    html += '</li>';
+  }
+  html += '</' + tag + '>';
+  return html;
+}
+
+function renderSectionTree(sections, depth) {
+  depth = depth || 1;
+  var html = '';
+  for (var i = 0; i < sections.length; i++) {
+    var sec = sections[i];
+    // Hide sections marked VISIBLE: false
+    if (sec.properties && sec.properties.VISIBLE === 'false') continue;
+    // Heading
+    var level = Math.min(sec.level, 5);
+    var tag = 'h' + level;
+    var cls = 'org-h' + level;
+    var headingContent = renderInline(sec.heading);
+    // Add icon if present
+    if (sec.properties && sec.properties.ICON) {
+      headingContent = '<span>' + escapeHtml(sec.properties.ICON) + '</span> ' + headingContent;
+    }
+    html += '<' + tag + ' class="' + cls + '">' + headingContent + '</' + tag + '>';
+
+    // Properties drawer (show non-metadata properties)
+    if (sec.properties) {
+      var showProps = {};
+      var hiddenKeys = ['STEP', 'REVEAL', 'PANE', 'ICON', 'NOTES', 'COLLAPSED', 'REFRESH', 'VISIBLE'];
+      Object.keys(sec.properties).forEach(function(k) {
+        if (hiddenKeys.indexOf(k) === -1) {
+          showProps[k] = sec.properties[k];
+        }
+      });
+      if (Object.keys(showProps).length > 0) {
+        html += '<div class="org-props">';
+        Object.keys(showProps).forEach(function(k) {
+          html += '<span class="org-prop-key">:' + escapeHtml(k) + ':</span> <span class="org-prop-val">' + escapeHtml(showProps[k]) + '</span> ';
+        });
+        html += '</div>';
+      }
+    }
+
+    // Content
+    if (sec.content && sec.content.length > 0) {
+      html += renderContentBlocks(sec.content);
+    }
+
+    // Children
+    if (sec.children && sec.children.length > 0) {
+      html += renderSectionTree(sec.children, depth + 1);
+    }
+  }
+  return html;
+}
+
+// ============================================================
+// FLATTEN SECTIONS (for modes that need flat traversal)
+// ============================================================
+function flattenSections(sections) {
+  var result = [];
+  function walk(arr) {
+    for (var i = 0; i < arr.length; i++) {
+      var sec = arr[i];
+      result.push(sec);
+      if (sec.children && sec.children.length > 0) {
+        walk(sec.children);
+      }
+    }
+  }
+  walk(sections);
+  return result;
+}
+
+// ============================================================
+// DISPLAY MODE RENDERERS
+// ============================================================
+
+function renderShow(doc) {
+  var html = '';
+  if (doc.headers.TITLE) {
+    html += '<div class="doc-title">' + renderInline(doc.headers.TITLE) + '</div>';
+  }
+  if (doc.headers.ATTR_IMAGE) {
+    html += '<img class="hero-image" src="' + escapeHtml(doc.headers.ATTR_IMAGE) + '" alt="hero">';
+  }
+  if (doc.preamble) {
+    html += renderContentBlocks(doc.preamble);
+  }
+  html += renderSectionTree(doc.sections);
+  return html;
+}
+
+function renderTalkThrough(doc) {
+  var html = '';
+  if (doc.headers.TITLE) {
+    html += '<div class="doc-title">' + renderInline(doc.headers.TITLE) + '</div>';
+  }
+
+  // Collect all sections flattened
+  var allSections = flattenSections(doc.sections);
+  var steps = [];
+  var alwaysVisible = [];
+  var currentStep = 0;
+  var totalSteps = 0;
+
+  // Determine steps — VISIBLE: true/false controls visibility
+  for (var i = 0; i < allSections.length; i++) {
+    var sec = allSections[i];
+    var isVisible = !(sec.properties && sec.properties.VISIBLE === 'false');
+    var reveal = (sec.properties && sec.properties.REVEAL) || 'next';
+    var stepNum = (sec.properties && sec.properties.STEP) ? parseInt(sec.properties.STEP) : null;
+
+    if (reveal === 'all' && !stepNum) {
+      // Always-visible sections (no step number)
+      if (isVisible) alwaysVisible.push(sec);
+      // If hidden via VISIBLE: false, skip entirely — agent will patch it
+    } else {
+      // Step sections — always render, VISIBLE controls class
+      var displayStep = stepNum || (steps.length + 1);
+      if (isVisible) currentStep = displayStep;
+      steps.push({
+        sec: sec,
+        stepNum: displayStep,
+        reveal: reveal,
+        visible: isVisible
+      });
+    }
+  }
+
+  // Sort steps by step number
+  steps.sort(function(a, b) { return a.stepNum - b.stepNum; });
+
+  // Re-number sequentially and count total
+  for (var i = 0; i < steps.length; i++) {
+    steps[i].displayStep = i + 1;
+    if (steps[i].visible) currentStep = steps[i].displayStep;
+  }
+  totalSteps = steps.length;
+
+  // Render always-visible sections
+  for (var i = 0; i < alwaysVisible.length; i++) {
+    var sec = alwaysVisible[i];
+    html += '<div class="section-card" data-reveal="all">';
+    var level = Math.min(sec.level, 5);
+    var headingContent = renderInline(sec.heading);
+    if (sec.properties && sec.properties.ICON) headingContent = escapeHtml(sec.properties.ICON) + ' ' + headingContent;
+    html += '<h' + level + ' class="org-h' + level + '">' + headingContent + '</h' + level + '>';
+    if (sec.content && sec.content.length > 0) html += renderContentBlocks(sec.content);
+    html += '</div>';
+  }
+
+  // Render step sections — visibility from :VISIBLE: property
+  for (var i = 0; i < steps.length; i++) {
+    var step = steps[i];
+    var sec = step.sec;
+    var visClass = step.visible ? 'step-visible' : 'step-hidden';
+    html += '<div class="section-card ' + visClass + '" data-step="' + step.displayStep + '" data-reveal="' + step.reveal + '">';
+    var level = Math.min(sec.level, 5);
+    var headingContent = renderInline(sec.heading);
+    if (sec.properties && sec.properties.ICON) headingContent = escapeHtml(sec.properties.ICON) + ' ' + headingContent;
+    html += '<h' + level + ' class="org-h' + level + '">' + headingContent + '</h' + level + '>';
+
+    // Show non-step/reveal properties
+    if (sec.properties) {
+      var showProps = {};
+      var hiddenKeys = ['STEP', 'REVEAL', 'ICON', 'VISIBLE'];
+      Object.keys(sec.properties).forEach(function(k) {
+        if (hiddenKeys.indexOf(k) === -1) {
+          showProps[k] = sec.properties[k];
+        }
+      });
+      if (Object.keys(showProps).length > 0) {
+        html += '<div class="org-props">';
+        Object.keys(showProps).forEach(function(k) {
+          html += '<span class="org-prop-key">:' + escapeHtml(k) + ':</span> <span class="org-prop-val">' + escapeHtml(showProps[k]) + '</span> ';
+        });
+        html += '</div>';
+      }
+    }
+
+    if (sec.content && sec.content.length > 0) html += renderContentBlocks(sec.content);
+    html += '</div>';
+  }
+
+  // Status indicator — shows current step (agent controls advancement via :VISIBLE:)
+  html += '<div class="talk-nav">';
+  html += '<span class="talk-step" id="talk-counter">Step ' + currentStep + ' of ' + totalSteps + '</span>';
+  html += '</div>';
+
+  return html;
+}
+
+function renderSideBySide(doc) {
+  var numCols = parseInt(doc.headers.COLUMNS) || 2;
+  var html = '';
+  if (doc.headers.TITLE) {
+    html += '<div class="doc-title">' + renderInline(doc.headers.TITLE) + '</div>';
+  }
+
+  // Collect all sections with their PANE property
+  var panes = {};
+  for (var p = 1; p <= numCols; p++) panes[p] = [];
+
+  var allSections = flattenSections(doc.sections);
+  for (var i = 0; i < allSections.length; i++) {
+    var sec = allSections[i];
+    // Skip hidden sections
+    if (sec.properties && sec.properties.VISIBLE === 'false') continue;
+    var pane = (sec.properties && parseInt(sec.properties.PANE)) || 1;
+    if (pane < 1 || pane > numCols) pane = 1;
+    panes[pane].push(sec);
+  }
+
+  html += '<div class="side-by-side-grid" style="grid-template-columns: repeat(' + numCols + ', 1fr);">';
+  for (var p = 1; p <= numCols; p++) {
+    html += '<div class="pane-section">';
+    for (var i = 0; i < panes[p].length; i++) {
+      var sec = panes[p][i];
+      html += '<div class="section-card">';
+      var level = Math.min(sec.level, 5);
+      var headingContent = renderInline(sec.heading);
+      if (sec.properties && sec.properties.ICON) headingContent = escapeHtml(sec.properties.ICON) + ' ' + headingContent;
+      html += '<h' + level + ' class="org-h' + level + '">' + headingContent + '</h' + level + '>';
+      if (sec.content && sec.content.length > 0) html += renderContentBlocks(sec.content);
+      if (sec.children && sec.children.length > 0) html += renderSectionTree(sec.children);
+      html += '</div>';
+    }
+    html += '</div>';
+  }
+  html += '</div>';
+
+  return html;
+}
+
+function renderSlides(doc) {
+  var html = '';
+  if (doc.headers.TITLE) {
+    html += '<div class="doc-title">' + renderInline(doc.headers.TITLE) + '</div>';
+  }
+
+  var slides = doc.sections;
+  if (!slides || slides.length === 0) {
+    return '<p class="org-body">No slides to display.</p>';
+  }
+
+  html += '<div id="slide-area"></div>';
+  html += '<div class="slide-nav">';
+  html += '<button id="slide-prev" onclick="slidePrev()">&#8592; Prev</button>';
+  html += '<span class="slide-counter" id="slide-counter">Slide 1 of ' + slides.length + '</span>';
+  html += '<button id="slide-next" onclick="slideNext()">Next &#8594;</button>';
+  html += '</div>';
+
+  // Pre-render all slide HTML and store in data object
+  window._slideData = [];
+  for (var i = 0; i < slides.length; i++) {
+    var sec = slides[i];
+    // Skip hidden sections
+    if (sec.properties && sec.properties.VISIBLE === 'false') continue;
+    var level = Math.min(sec.level, 5);
+    var headingContent = renderInline(sec.heading);
+    if (sec.properties && sec.properties.ICON) headingContent = escapeHtml(sec.properties.ICON) + ' ' + headingContent;
+    var slideHtml = '<div class="slide-container section-card">';
+    slideHtml += '<h' + level + ' class="org-h' + level + '">' + headingContent + '</h' + level + '>';
+    if (sec.content && sec.content.length > 0) slideHtml += renderContentBlocks(sec.content);
+    slideHtml += '</div>';
+    if (sec.properties && sec.properties.NOTES) {
+      slideHtml += '<div class="speaker-notes">&#127908; ' + escapeHtml(sec.properties.NOTES) + '</div>';
+    }
+    window._slideData.push(slideHtml);
+  }
+  window._currentSlide = 0;
+  updateSlides();
+
+  return html;
+}
+
+function updateSlides() {
+  var area = document.getElementById('slide-area');
+  if (area && window._slideData) {
+    area.innerHTML = window._slideData[window._currentSlide] || '';
+  }
+  var counter = document.getElementById('slide-counter');
+  if (counter && window._slideData) {
+    counter.textContent = 'Slide ' + (window._currentSlide + 1) + ' of ' + window._slideData.length;
+  }
+  var prev = document.getElementById('slide-prev');
+  var next = document.getElementById('slide-next');
+  if (prev) prev.disabled = (window._currentSlide <= 0);
+  if (next) next.disabled = (!window._slideData || window._currentSlide >= window._slideData.length - 1);
+}
+
+function slideNext() {
+  if (window._slideData && window._currentSlide < window._slideData.length - 1) {
+    window._currentSlide++;
+    updateSlides();
+  }
+}
+function slidePrev() {
+  if (window._currentSlide > 0) {
+    window._currentSlide--;
+    updateSlides();
+  }
+}
+
+function renderDashboard(doc) {
+  var html = '';
+  if (doc.headers.TITLE) {
+    html += '<div class="doc-title">' + renderInline(doc.headers.TITLE) + '</div>';
+  }
+
+  var allSections = flattenSections(doc.sections);
+  var globalRefresh = parseInt(doc.headers.REFRESH) || 0;
+
+  html += '<div class="dash-grid">';
+  for (var i = 0; i < allSections.length; i++) {
+    var sec = allSections[i];
+    // Skip hidden sections
+    if (sec.properties && sec.properties.VISIBLE === 'false') continue;
+    var sectionRefresh = (sec.properties && parseInt(sec.properties.REFRESH)) || globalRefresh;
+    var headingContent = renderInline(sec.heading);
+    if (sec.properties && sec.properties.ICON) headingContent = escapeHtml(sec.properties.ICON) + ' ' + headingContent;
+    html += '<div class="dash-card">';
+    html += '<h3 class="org-h2">' + headingContent + '</h3>';
+    if (sectionRefresh > 0) {
+      html += '<span class="dash-refresh-badge">&#8635; ' + sectionRefresh + 's</span>';
+    }
+    if (sec.content && sec.content.length > 0) {
+      html += renderContentBlocks(sec.content);
+    }
+    if (sec.children && sec.children.length > 0) {
+      html += renderSectionTree(sec.children);
+    }
+    html += '</div>';
+  }
+  html += '</div>';
+
+  return html;
+}
+
+function renderCard(doc) {
+  // Single compact card - use first visible section
+  var allSections = flattenSections(doc.sections);
+  var visibleSections = allSections.filter(function(s) {
+    return !(s.properties && s.properties.VISIBLE === 'false');
+  });
+  var first = visibleSections.length > 0 ? visibleSections[0] : null;
+
+  if (!first && !doc.headers.TITLE) {
+    return '<div class="card-center"><div class="status-card"><p>No card data</p></div></div>';
+  }
+
+  var iconEmoji = (first && first.properties && first.properties.ICON) || '';
+
+  var html = '<div class="card-center"><div class="status-card">';
+  if (doc.headers.TITLE) {
+    html += '<div class="card-title">' + renderInline(doc.headers.TITLE) + '</div>';
+  } else if (first) {
+    html += '<div class="card-title">' + renderInline(first.heading) + '</div>';
+  }
+  if (iconEmoji) {
+    html += '<span class="card-icon">' + escapeHtml(iconEmoji) + '</span>';
+  }
+  if (first && first.content && first.content.length > 0) {
+    html += '<div class="card-body">' + renderContentBlocks(first.content) + '</div>';
+  }
+  html += '</div></div>';
+  return html;
+}
+
+// ============================================================
+// MAIN RENDER
+// ============================================================
+function render(doc) {
+  var mode = (doc.headers.DISPLAY_MODE || 'show').toLowerCase();
+  var badge = document.getElementById('mode-badge');
+  badge.textContent = 'MODE: ' + mode;
+
+  // Set page title
+  if (doc.headers.TITLE) {
+    document.title = doc.headers.TITLE + ' \u2014 Display';
+  } else {
+    document.title = 'Display';
+  }
+
+  // Apply ATTR_STYLE if present
+  var app = document.getElementById('app');
+  app.removeAttribute('style');
+  if (doc.headers.ATTR_STYLE) {
+    var stylePairs = doc.headers.ATTR_STYLE.split(';');
+    var cssText = '';
+    stylePairs.forEach(function(s) {
+      var parts = s.split(':');
+      if (parts.length === 2) {
+        cssText += parts[0].trim() + ': ' + parts[1].trim() + '; ';
+      }
+    });
+    if (cssText) app.style.cssText = cssText;
+  }
+
+  // Check for empty content
+  if ((!doc.sections || doc.sections.length === 0) && !doc.preamble) {
+    app.innerHTML = '<div class="waiting-msg"><div class="spinner"></div><span>Waiting for content...</span></div>';
+    return;
+  }
+
+  // Reset state
+  window._slideData = null;
+  window._currentSlide = 0;
+
+  var contentHtml = '';
+  switch (mode) {
+    case 'talk-through':
+      contentHtml = renderTalkThrough(doc);
+      break;
+    case 'side-by-side':
+      contentHtml = renderSideBySide(doc);
+      break;
+    case 'slides':
+      contentHtml = renderSlides(doc);
+      break;
+    case 'dashboard':
+      contentHtml = renderDashboard(doc);
+      break;
+    case 'card':
+      contentHtml = renderCard(doc);
+      break;
+    default:
+      contentHtml = renderShow(doc);
+      break;
+  }
+
+  app.innerHTML = contentHtml;
+
+  // Post-render setup
+
+  // Dashboard: set up auto-refresh
+  if (mode === 'dashboard') {
+    var globalRefresh = parseInt(doc.headers.REFRESH) || 0;
+    if (globalRefresh > 0) {
+      clearInterval(window._dashRefreshInterval);
+      window._dashRefreshInterval = setInterval(fetchContent, globalRefresh * 1000);
+    }
+  } else {
+    clearInterval(window._dashRefreshInterval);
+  }
+}
+
+// ============================================================
+// CONTENT FETCHING
+// ============================================================
+var lastContent = '';
+var sseConnected = false;
+
+async function fetchContent() {
+  try {
+    var resp = await fetch('/display.org');
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    var text = await resp.text();
+    if (text !== lastContent) {
+      lastContent = text;
+      var doc = parseOrg(text);
+      if (!text.trim()) {
+        document.getElementById('app').innerHTML = '<div class="waiting-msg"><div class="spinner"></div><span>Waiting for content...</span></div>';
+        document.getElementById('mode-badge').textContent = 'MODE: waiting';
+        return;
+      }
+      render(doc);
+    }
+  } catch (e) {
+    console.error('Fetch error:', e);
+  }
+}
+
+function connectSSE() {
+  if (sseConnected) return;
+  try {
+    var es = new EventSource('/api/events');
+    es.addEventListener('update', function(e) {
+      var text = JSON.parse(e.data);
+      if (text !== lastContent) {
+        lastContent = text;
+        var doc = parseOrg(text);
+        if (!text.trim()) {
+          document.getElementById('app').innerHTML = '<div class="waiting-msg"><div class="spinner"></div><span>Waiting for content...</span></div>';
+          document.getElementById('mode-badge').textContent = 'MODE: waiting';
+          return;
+        }
+        render(doc);
+      }
+    });
+    es.onopen = function() { sseConnected = true; console.log('SSE connected'); };
+    es.onerror = function() { es.close(); sseConnected = false; console.log('SSE disconnected, falling back to polling'); };
+  } catch (e) {
+    console.log('SSE not available, using polling');
+  }
+}
+
+// ============================================================
+// KEYBOARD NAVIGATION FOR SLIDES
+// ============================================================
+document.addEventListener('keydown', function(e) {
+  var mode = document.getElementById('mode-badge').textContent.replace('MODE: ', '');
+  if (mode === 'slides') {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { slideNext(); e.preventDefault(); }
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { slidePrev(); e.preventDefault(); }
+  }
+
+});
+
+// ============================================================
+// INIT
+// ============================================================
+document.addEventListener('DOMContentLoaded', function() {
+  // Initial fetch
+  fetchContent();
+
+  // Try SSE first, also poll as fallback
+  connectSSE();
+
+  // Always poll every 2 seconds as fallback
+  setInterval(fetchContent, 2000);
+});
+
+// Register service worker
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(function() {});
+}
+</script>
+</body>
+</html>

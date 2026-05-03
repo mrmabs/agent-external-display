@@ -2,7 +2,7 @@
 name: show-me
 description: "Use when the user says 'show me', 'display', or 'put on screen'. Writes concise content to the display file within an 80×20 character budget (expandable to 160×40 on explicit user request). Keeps the agent's text/voice response brief and presenter-voiced."
 version: 1.1.0
-author: Marcus Berg, Cellia
+author: mabs, hermes
 license: MIT
 tags: [display, output, companion-screen, org-mode, agent-pattern]
 related_skills: [talk-through]
